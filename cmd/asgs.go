@@ -16,6 +16,8 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/hacker65536/getlistener/pkg/awsfunc"
 	"github.com/spf13/cobra"
 )
@@ -37,10 +39,12 @@ to quickly create a Cobra application.`,
 			awsfunc.Logflg = ok
 		}
 
-		awsfunc.New().GetAsgsFromTags()
+		if len(args) > 0 {
+			r := awsfunc.New().GetAsgsFromTags(args[0])
+			fmt.Println(r)
+		}
 	},
 }
-
 
 func init() {
 	rootCmd.AddCommand(asgsCmd)
@@ -51,6 +55,7 @@ func init() {
 	// and all subcommands, e.g.:
 	// asgsCmd.PersistentFlags().String("foo", "", "A help for foo")
 	asgsCmd.PersistentFlags().BoolP("debug", "d", false, "output debuglog")
+	//asgsCmd.PersistentFlags().str
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

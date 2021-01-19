@@ -49,19 +49,45 @@ func New() *AWSsvcs {
 	}
 }
 
-func (a *AWSsvcs) GetAsgsFromTags() []string {
+func (a *AWSsvcs) describeTags() {
+
+	svc := a.auto
+	param := &autoscaling.DescribeTagsInput{}
+
+	p := autoscaling.NewDescribeTagsPaginator(svc, param)
+	var i int
+	asgs := []string{}
+	for p.HasMorePages() {
+		i++
+
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		for _, v := range page.Tags {
+			log.WithFields(log.Fields{
+				"asg": aws.ToString(v.ResourceId),
+			}).Info("A walrus appears")
+			asgs = append(asgs, aws.ToString(v.ResourceId))
+
+		}
+	}
+}
+
+func (a *AWSsvcs) GetAsgsFromTags(tag string) []string {
 	svc := a.auto
 	param := &autoscaling.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
 				Name:   aws.String("value"),
-				Values: []string{"CdkAlbGrpcStack"},
+				Values: []string{tag},
 			},
 		},
 	}
 
 	p := autoscaling.NewDescribeTagsPaginator(svc, param)
-	r := regexp.MustCompile("CdkAlbGrpcStack")
+	r := regexp.MustCompile(tag)
 	var i int
 	asgs := []string{}
 	for p.HasMorePages() {
